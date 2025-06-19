@@ -1,6 +1,22 @@
-FROM python:3.13.2-alpine3.21@sha256:323a717dc4a010fee21e3f1aac738ee10bb485de4e7593ce242b36ee48d6b352
+FROM python:3.10-slim
+
+# Install Docker CLI inside the container
+RUN apt-get update && apt-get install -y \
+    docker.io \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-COPY . .
-CMD ["sh"]
+
+COPY validate_codebases.py .
+
+# Create directory for codebases
+RUN mkdir -p /app/codebases
+
+# Make script executable
+RUN chmod +x validate_codebases.py
+
+# Install Python dependencies
+RUN pip install --no-cache-dir pytest 
+    
+# Set default command
+CMD ["python", "validate_codebases.py", "--help"]
